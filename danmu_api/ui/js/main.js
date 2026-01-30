@@ -416,7 +416,9 @@ function switchSection(section, event = null) {
                     displayBase = displayBase.slice(0, -1);
                 }
                 
-                customAlert('请在URL中配置相应的TOKEN以访问此功能！\\n\\n访问方式：' + displayBase + '/{TOKEN}');
+                // 根据section类型显示不同的token提示
+                const tokenType = section === 'env' ? 'ADMIN_TOKEN' : 'TOKEN';
+                customAlert('请在URL中配置相应的' + tokenType + '以访问此功能！\\n\\n访问方式：' + displayBase + '/{' + tokenType + '}');
             }, 100);
             return;
         }
@@ -519,6 +521,16 @@ async function init() {
         // 获取真实日志数据
         fetchRealLogs();
         
+        // 初始化推送弹幕界面
+        if (typeof initPushDanmuInterface === 'function') {
+            initPushDanmuInterface();
+        }
+        
+        // 初始化接口调试界面
+        if (typeof initApiTestInterface === 'function') {
+            initApiTestInterface();
+        }
+        
     } catch (error) {
         console.error('初始化失败:', error);
         addLog('系统初始化失败: ' + error.message, 'error');
@@ -563,6 +575,25 @@ function copyApiEndpoint() {
                 addLog('复制API端点失败: ' + err, 'error');
             });
     }
+}
+
+function escapeHtml(text) {
+    // 如果是 null 或 undefined，返回空字符串
+    if (text === null || text === undefined) {
+        return '';
+    }
+    
+    // 将非字符串值转换为字符串
+    const str = String(text);
+    
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return str.replace(/[&<>"']/g, m => map[m]);
 }
 
 
